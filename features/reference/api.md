@@ -1,7 +1,7 @@
 # API Reference
 
 **Base path:** `/todo/`
-**Status:** Integrated API through **Feature 4** (authentication, lists, todos, and profile).
+**Status:** Integrated API through **Feature 5** (authentication, lists, todos, profile, and due dates).
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when routes or payloads change.
 
 **Auth:** Send `Authorization: Bearer <token>` on protected routes.
@@ -15,6 +15,7 @@
 | List CRUD (`GET/POST/PUT/DELETE /todo/lists`) | 2 |
 | Todo CRUD | 3 |
 | Profile read and update (`GET/PUT /todo/users/:id`) | 4 |
+| Optional todo `dueDate` | 5 |
 
 ---
 
@@ -136,22 +137,26 @@ A `userId` in the body is ignored. The saved owner is the signed-in user.
 |--------|------|------|---------|
 | `GET` | `/todo/lists/:listId/todos` | Yes | Todos in a list the caller owns. Incomplete first, then oldest `createdAt` |
 | `POST` | `/todo/lists/:listId/todos` | Yes | Add a todo. `userId` is the caller. `completed` starts `false` |
-| `PUT` | `/todo/todos/:id` | Yes | Change `title` and/or `completed` on a todo the caller owns |
+| `PUT` | `/todo/todos/:id` | Yes | Change `title`, `completed`, and/or `dueDate` on a todo the caller owns |
 | `DELETE` | `/todo/todos/:id` | Yes | Delete a todo the caller owns |
 
 **Create body:**
 
 ```json
-{ "title": "Buy milk" }
+{ "title": "Buy milk", "dueDate": "2026-07-15" }
 ```
+
+`dueDate` is optional. Omit it or send `null` for no due date.
 
 A `userId` in the body is ignored.
 
 **Update body** (send either field, or both):
 
 ```json
-{ "title": "Buy oat milk", "completed": true }
+{ "title": "Buy oat milk", "completed": true, "dueDate": "2026-07-20" }
 ```
+
+Send `dueDate: null` to clear the date. Leave `dueDate` out of the body to keep the saved date.
 
 **Todo success** (`201` create, `200` update):
 
@@ -161,6 +166,7 @@ A `userId` in the body is ignored.
   "listId": 1,
   "title": "Buy milk",
   "completed": false,
+  "dueDate": "2026-07-15",
   "userId": 42,
   "createdAt": "2026-07-02T12:05:00.000Z",
   "updatedAt": "2026-07-02T12:05:00.000Z"
@@ -179,6 +185,7 @@ A `userId` in the body is ignored.
 |-----------|--------|---------|
 | Missing or whitespace-only title | `400` | `"Todo title is required."` |
 | Title longer than 255 characters | `400` | `"Todo title must be 255 characters or fewer."` |
+| `dueDate` is not a real `YYYY-MM-DD` calendar date | `400` | `"Due date must be a valid date in YYYY-MM-DD format."` |
 | Parent list missing or owned by someone else | `404` | `"List with id=<id> not found."` |
 | Todo missing or owned by someone else | `404` | `"Todo with id=<id> not found."` |
 | Missing token | `401` | `"Unauthorized! No token provided."` |

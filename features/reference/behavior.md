@@ -1,6 +1,6 @@
 # Behavior & Rules Reference
 
-**Living snapshot** of product rules currently in force through Feature 4.
+**Living snapshot** of product rules currently in force through Feature 5.
 
 These files answer: *"What rules does the app enforce right now?"*
 They do **not** authorize new scope — implement only from `features/feature-*.md`.
@@ -54,3 +54,5 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Todos are ordered **incomplete first**, then oldest `createdAt`. A completed title is struck through | Todo controller `order`; dashboard checkbox | Feature 3 |
 | Another user's list or todo returns **`404`**, never `403`. Create ignores a client `userId` | `getAccessibleListOrNull`, `getAccessibleTodoOrNull` | Feature 3 |
 | Deleting a list deletes its todos | `listId` foreign key `onDelete: CASCADE` | Feature 3 |
+| A todo `dueDate` is an optional calendar date (`YYYY-MM-DD`) or `null`. Omit it on update to keep the saved date. Send `null` to clear it. An invalid date is **"Due date must be a valid date in YYYY-MM-DD format."** | Todo controller | Feature 5 |
+| The items row shows a readable due date when one is set. An incomplete todo dated before today uses overdue styling. A completed todo does not | `Dashboard.vue` | Feature 5 |

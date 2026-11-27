@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import listServices from "../services/listServices.js";
 import todoServices from "../services/todoServices.js";
+import { formatDueDate, isTodoOverdue, optionalDueDateRules, toDateInputValue } from "../config/validation.js";
 
 const lists = ref([]);
 const listsLoading = ref(false);
@@ -36,7 +37,9 @@ const deleteTodoDialogOpen = ref(false);
 const addTodoForm = ref(null);
 const editTodoForm = ref(null);
 const newTodoTitle = ref("");
+const newTodoDueDate = ref("");
 const editTodoTitle = ref("");
+const editTodoDueDate = ref("");
 const todoToEdit = ref(null);
 const todoToDelete = ref(null);
 const addTodoLoading = ref(false);
@@ -218,12 +221,14 @@ const closeItemsDialog = () => {
 const openAddTodoDialog = () => {
   todoDialogError.value = "";
   newTodoTitle.value = "";
+  newTodoDueDate.value = "";
   addTodoDialogOpen.value = true;
 };
 
 const closeAddTodoDialog = () => {
   addTodoDialogOpen.value = false;
   newTodoTitle.value = "";
+  newTodoDueDate.value = "";
   todoDialogError.value = "";
 };
 
@@ -236,7 +241,10 @@ const handleAddTodo = async () => {
 
   addTodoLoading.value = true;
   try {
-    const response = await todoServices.createTodo(itemsList.value.id, newTodoTitle.value.trim());
+    const title = newTodoTitle.value.trim();
+    const response = newTodoDueDate.value
+      ? await todoServices.createTodo(itemsList.value.id, title, newTodoDueDate.value)
+      : await todoServices.createTodo(itemsList.value.id, title);
     todos.value = sortTodos([...todos.value, response.data]);
     closeAddTodoDialog();
   } catch (error) {
@@ -250,6 +258,7 @@ const openEditTodoDialog = (todo) => {
   todoDialogError.value = "";
   todoToEdit.value = todo;
   editTodoTitle.value = todo.title;
+  editTodoDueDate.value = toDateInputValue(todo.dueDate);
   editTodoDialogOpen.value = true;
 };
 
@@ -257,6 +266,7 @@ const closeEditTodoDialog = () => {
   editTodoDialogOpen.value = false;
   todoToEdit.value = null;
   editTodoTitle.value = "";
+  editTodoDueDate.value = "";
   todoDialogError.value = "";
 };
 
@@ -271,6 +281,7 @@ const handleEditTodo = async () => {
   try {
     const response = await todoServices.updateTodo(todoToEdit.value.id, {
       title: editTodoTitle.value.trim(),
+      dueDate: editTodoDueDate.value || null,
     });
     todos.value = sortTodos(
       todos.value.map((todo) => (todo.id === response.data.id ? response.data : todo))
@@ -493,6 +504,13 @@ onMounted(() => {
               >
                 {{ todo.title }}
               </v-list-item-title>
+              <div
+                v-if="todo.dueDate"
+                class="todo-due-date text-caption"
+                :class="{ 'text-error': isTodoOverdue(todo) }"
+              >
+                {{ formatDueDate(todo.dueDate) }}
+              </div>
               <template #append>
                 <v-btn
                   icon="mdi-pencil"
@@ -525,6 +543,12 @@ onMounted(() => {
         <v-card-text>
           <v-form ref="addTodoForm" @submit.prevent="handleAddTodo">
             <v-text-field v-model="newTodoTitle" label="Todo title" :rules="todoTitleRules" autofocus />
+            <v-text-field
+              v-model="newTodoDueDate"
+              label="Due date"
+              type="date"
+              :rules="optionalDueDateRules"
+            />
             <v-alert v-if="todoDialogError" type="error" class="mt-2">{{ todoDialogError }}</v-alert>
           </v-form>
         </v-card-text>
@@ -544,6 +568,12 @@ onMounted(() => {
         <v-card-text>
           <v-form ref="editTodoForm" @submit.prevent="handleEditTodo">
             <v-text-field v-model="editTodoTitle" label="Todo title" :rules="todoTitleRules" autofocus />
+            <v-text-field
+              v-model="editTodoDueDate"
+              label="Due date"
+              type="date"
+              :rules="optionalDueDateRules"
+            />
             <v-alert v-if="todoDialogError" type="error" class="mt-2">{{ todoDialogError }}</v-alert>
           </v-form>
         </v-card-text>

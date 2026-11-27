@@ -20,6 +20,37 @@ const rejectBadTitle = (res, title) => {
   return false;
 };
 
+const DUE_DATE_MESSAGE = "Due date must be a valid date in YYYY-MM-DD format.";
+
+// True for a real calendar day written as YYYY-MM-DD. Null is allowed by the caller.
+const isCalendarDate = (value) => {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  );
+};
+
+// Returns true when a 400 response was sent. Null and a missing field are not errors.
+const rejectBadDueDate = (res, dueDate) => {
+  if (dueDate === null || dueDate === undefined) {
+    return false;
+  }
+
+  if (!isCalendarDate(dueDate)) {
+    res.status(400).send({ message: DUE_DATE_MESSAGE });
+    return true;
+  }
+
+  return false;
+};
+
 // Incomplete tasks first, then oldest first.
 const todoOrder = [
   ["completed", "ASC"],
@@ -70,8 +101,17 @@ exports.create = async (req, res) => {
       return;
     }
 
+    // Omitted or null means no due date. Any other value must be YYYY-MM-DD.
+    const dueDate = Object.prototype.hasOwnProperty.call(req.body, "dueDate")
+      ? req.body.dueDate
+      : null;
+    if (rejectBadDueDate(res, dueDate)) {
+      return;
+    }
+
     const todo = await db.todo.create({
       title: req.body.title.trim(),
+      dueDate,
       listId,
       userId: req.user.id,
     });
@@ -96,6 +136,10 @@ exports.update = async (req, res) => {
       return res.status(404).send({ message: `Todo with id=${todoId} not found.` });
     }
 
+    if (Object.prototype.hasOwnProperty.call(req.body, "dueDate") && rejectBadDueDate(res, req.body.dueDate)) {
+      return;
+    }
+
     if (Object.prototype.hasOwnProperty.call(req.body, "title")) {
       if (rejectBadTitle(res, req.body.title)) {
         return;
@@ -105,6 +149,11 @@ exports.update = async (req, res) => {
 
     if (Object.prototype.hasOwnProperty.call(req.body, "completed")) {
       todo.completed = Boolean(req.body.completed);
+    }
+
+    // null clears the date. Leaving dueDate out of the body keeps the saved date.
+    if (Object.prototype.hasOwnProperty.call(req.body, "dueDate")) {
+      todo.dueDate = req.body.dueDate;
     }
 
     await todo.save();

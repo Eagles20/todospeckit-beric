@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Integrated schema through **Feature 4** (`users`, `sessions`, `lists`, `todos`).
+**Status:** Integrated schema through **Feature 5** (`users`, `sessions`, `lists`, `todos`).
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when schema changes.
 
 ## Feature provenance
@@ -11,6 +11,7 @@
 | `lists` | Feature 2 |
 | `todos` | Feature 3 |
 | Profile edits the existing `users` row (no new table or columns) | Feature 4 |
+| `todos.dueDate` | Feature 5 |
 
 ---
 
@@ -66,6 +67,7 @@ No `createdAt` / `updatedAt` columns.
 | `listId` | INTEGER FK | Required → `lists.id`; deleting the list deletes these rows |
 | `title` | STRING(255) | Required; trimmed before save |
 | `completed` | BOOLEAN | Required; default `false` |
+| `dueDate` | DATEONLY | Optional calendar date (`YYYY-MM-DD`); `null` when unset |
 | `userId` | INTEGER FK | Required → `users.id`; set from the signed-in user on create |
 | `createdAt` | DATE | Sequelize timestamp |
 | `updatedAt` | DATE | Sequelize timestamp |

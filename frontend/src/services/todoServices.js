@@ -5,7 +5,14 @@ import apiClient from "./services.js";
 
 const getTodos = (listId) => apiClient.get(`lists/${listId}/todos`);
 
-const createTodo = (listId, title) => apiClient.post(`lists/${listId}/todos`, { title });
+// dueDate is optional. Leave it out when the person did not pick a date.
+const createTodo = (listId, title, dueDate) => {
+  const body = { title };
+  if (dueDate) {
+    body.dueDate = dueDate;
+  }
+  return apiClient.post(`lists/${listId}/todos`, body);
+};
 
 // changes can include title and/or completed.
 const updateTodo = (id, changes) => apiClient.put(`todos/${id}`, changes);

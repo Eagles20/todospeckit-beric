@@ -31,6 +31,11 @@ export default (sequelize, Sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
+      // Optional calendar date only (YYYY-MM-DD). Null means no due date.
+      dueDate: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
       // Which user owns this task (users.id). The controller sets this from the session.
       userId: {
         type: Sequelize.INTEGER,
