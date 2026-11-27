@@ -1,6 +1,6 @@
 # Behavior & Rules Reference
 
-**Living snapshot** of product rules currently in force through Feature 3.
+**Living snapshot** of product rules currently in force through Feature 4.
 
 These files answer: *"What rules does the app enforce right now?"*
 They do **not** authorize new scope — implement only from `features/feature-*.md`.
@@ -30,7 +30,13 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | A signed-out user who opens home is sent to **login** | `router.beforeEach` | Feature 1 |
 | Authenticated API calls send `Authorization: Bearer <token>`. A `401` on a protected call clears `user` and goes to login | `services.js` interceptors | Feature 1 |
 | Login and register pages have **no MenuBar** | `App.vue` | Feature 1 |
-| Home is the lists dashboard. **MenuBar** shows the signed-in user's name and **Sign out** | `Dashboard.vue`, `MenuBar.vue` | Feature 2 |
+| Home is the lists dashboard | `Dashboard.vue` | Feature 2 |
+| **MenuBar** is a user icon (`mdi-account-circle`). The dropdown shows full name, username, and email, plus **Edit Profile** and **Log out**. There is no standalone **Sign out** button | `MenuBar.vue` | Feature 4 |
+| Profile read and update apply only when `:id` is `req.user.id`. Anyone else gets **`404`** `"User with id=<id> not found."` | `getAccessibleUserOrNull` | Feature 4 |
+| Profile update trims names, email, and username. Username is stored lowercase. A blank password is left unchanged. A password shorter than 8 characters is rejected | User controller | Feature 4 |
+| Duplicate username or email on profile update uses the same messages as registration | User controller | Feature 4 |
+| After a successful save, `localStorage` key `user` is refreshed (token kept) and `user-logged-in` is dispatched | `MenuBar.vue` | Feature 4 |
+| Edit Profile uses the shared `emailRules`. Mismatched passwords show **"Passwords do not match."** | `MenuBar.vue` | Feature 4 |
 
 ## Lists
 

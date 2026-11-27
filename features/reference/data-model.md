@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Integrated schema through **Feature 3** (`users`, `sessions`, `lists`, `todos`).
+**Status:** Integrated schema through **Feature 4** (`users`, `sessions`, `lists`, `todos`).
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when schema changes.
 
 ## Feature provenance
@@ -10,6 +10,7 @@
 | `users`, `sessions` | Feature 1 |
 | `lists` | Feature 2 |
 | `todos` | Feature 3 |
+| Profile edits the existing `users` row (no new table or columns) | Feature 4 |
 
 ---
 

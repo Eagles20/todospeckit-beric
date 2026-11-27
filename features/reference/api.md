@@ -1,7 +1,7 @@
 # API Reference
 
 **Base path:** `/todo/`
-**Status:** Integrated API through **Feature 3** (authentication, lists, and todos).
+**Status:** Integrated API through **Feature 4** (authentication, lists, todos, and profile).
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when routes or payloads change.
 
 **Auth:** Send `Authorization: Bearer <token>` on protected routes.
@@ -14,6 +14,7 @@
 | Register, login, logout | 1 |
 | List CRUD (`GET/POST/PUT/DELETE /todo/lists`) | 2 |
 | Todo CRUD | 3 |
+| Profile read and update (`GET/PUT /todo/users/:id`) | 4 |
 
 ---
 
@@ -180,4 +181,53 @@ A `userId` in the body is ignored.
 | Title longer than 255 characters | `400` | `"Todo title must be 255 characters or fewer."` |
 | Parent list missing or owned by someone else | `404` | `"List with id=<id> not found."` |
 | Todo missing or owned by someone else | `404` | `"Todo with id=<id> not found."` |
+| Missing token | `401` | `"Unauthorized! No token provided."` |
+
+---
+
+## Profile (Feature 4)
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/todo/users/:id` | Yes | The caller's own profile |
+| `PUT` | `/todo/users/:id` | Yes | Update the caller's own profile |
+
+A user can read and update only `id = req.user.id`. Another user's id returns `404`.
+
+**Update body.** `password` is optional. Leave it out to keep the current password.
+
+```json
+{
+  "fName": "Jane",
+  "lName": "Doe",
+  "email": "jane@example.com",
+  "username": "jdoe",
+  "password": "newpassword123"
+}
+```
+
+**Profile success** (`200`). The password hash is never included. `users` has no timestamps.
+
+```json
+{
+  "id": 42,
+  "fName": "Jane",
+  "lName": "Doe",
+  "email": "jane@example.com",
+  "username": "jdoe",
+  "role": "worker"
+}
+```
+
+`role` is returned and is not changed by this update. Username is stored lowercase.
+
+**Profile errors:**
+
+| Situation | Status | Message |
+|-----------|--------|---------|
+| Password present and shorter than 8 characters | `400` | `"Password must be at least 8 characters."` |
+| Missing or whitespace-only first name, last name, email, or username | `400` | `"First name is required."`, `"Last name is required."`, `"Email is required."`, or `"Username is required."` |
+| Username belongs to someone else | `400` | `"Username is already taken."` |
+| Email belongs to someone else | `400` | `"Email is already registered."` |
+| Missing user, or another user's id | `404` | `"User with id=<id> not found."` |
 | Missing token | `401` | `"Unauthorized! No token provided."` |

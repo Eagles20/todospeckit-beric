@@ -60,3 +60,13 @@ export const getAccessibleTodoOrNull = async (req, todoId) => {
 
   return row ?? null;
 };
+
+// Load a user only when the id is the signed-in user. Anyone else looks like "not found".
+export const getAccessibleUserOrNull = async (req, userId) => {
+  if (Number(userId) !== Number(req.user.id)) {
+    return null;
+  }
+
+  const row = await db.user.findByPk(userId);
+  return row ?? null;
+};
