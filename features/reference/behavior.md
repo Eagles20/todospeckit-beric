@@ -1,6 +1,6 @@
 # Behavior & Rules Reference
 
-**Living snapshot** of product rules currently in force through Feature 2.
+**Living snapshot** of product rules currently in force through Feature 3.
 
 These files answer: *"What rules does the app enforce right now?"*
 They do **not** authorize new scope — implement only from `features/feature-*.md`.
@@ -42,3 +42,9 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | List names are trimmed. Empty or whitespace-only names are rejected with **"List name is required."** Names over 100 characters are rejected with **"List name must be 100 characters or fewer."** | List controller and the dashboard form | Feature 2 |
 | The dashboard heading is **My Lists**. Zero lists shows **"No lists yet. Create your first list."** | `Dashboard.vue` | Feature 2 |
 | Each row has **Edit list** and **Delete list** icon actions. Add, rename, and delete use dialogs | `Dashboard.vue` | Feature 2 |
+| Each list row also has **View items for {name}**. That opens a dialog of only that list's todos | `Dashboard.vue` | Feature 3 |
+| **+ Add Item** is inside the items dialog, not on the main lists view | `Dashboard.vue` | Feature 3 |
+| New todos start **not completed**. Titles are trimmed. Empty titles are **"Todo title is required."** Titles over 255 characters are rejected | Todo controller and the add/edit dialogs | Feature 3 |
+| Todos are ordered **incomplete first**, then oldest `createdAt`. A completed title is struck through | Todo controller `order`; dashboard checkbox | Feature 3 |
+| Another user's list or todo returns **`404`**, never `403`. Create ignores a client `userId` | `getAccessibleListOrNull`, `getAccessibleTodoOrNull` | Feature 3 |
+| Deleting a list deletes its todos | `listId` foreign key `onDelete: CASCADE` | Feature 3 |
