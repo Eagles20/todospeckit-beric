@@ -41,3 +41,13 @@ export const authenticate = async (req, res, next) => {
     return res.status(500).send({ message: "Could not verify the session." });
   }
 };
+
+// Load one list only if it belongs to the signed-in user.
+// Returns null when the id is missing or owned by someone else (callers send 404).
+export const getAccessibleListOrNull = async (req, listId) => {
+  const row = await db.list.findOne({
+    where: { id: listId, userId: req.user.id },
+  });
+
+  return row ?? null;
+};

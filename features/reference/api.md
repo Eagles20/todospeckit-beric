@@ -1,7 +1,7 @@
 # API Reference
 
 **Base path:** `/todo/`
-**Status:** Integrated API through **Feature 1** (register, login, logout).
+**Status:** Integrated API through **Feature 2** (authentication and todo lists).
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when routes or payloads change.
 
 **Auth:** Send `Authorization: Bearer <token>` on protected routes.
@@ -12,6 +12,7 @@
 | Area | Feature |
 |------|---------|
 | Register, login, logout | 1 |
+| List CRUD (`GET/POST/PUT/DELETE /todo/lists`) | 2 |
 
 ---
 
@@ -76,4 +77,51 @@
 | Missing Bearer token | `401` | `"Unauthorized! No token provided."` |
 | Unknown or expired token | `401` | `"Unauthorized! Invalid or expired token."` |
 
-Scaffold health check (not part of Feature 1): `GET /todo/health` returns `{ "status": "ok" }`.
+Scaffold health check: `GET /todo/health` returns `{ "status": "ok" }`.
+
+---
+
+## Lists (Feature 2)
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/todo/lists` | Yes | Lists owned by the caller, ordered by `name` A to Z |
+| `POST` | `/todo/lists` | Yes | Create a list owned by the caller |
+| `PUT` | `/todo/lists/:listId` | Yes | Rename a list the caller owns |
+| `DELETE` | `/todo/lists/:listId` | Yes | Delete a list the caller owns |
+
+**Create / rename body:**
+
+```json
+{ "name": "Groceries" }
+```
+
+A `userId` in the body is ignored. The saved owner is the signed-in user.
+
+**List success** (`201` create, `200` rename):
+
+```json
+{
+  "id": 1,
+  "name": "Groceries",
+  "userId": 42,
+  "createdAt": "2026-07-02T12:00:00.000Z",
+  "updatedAt": "2026-07-02T12:00:00.000Z"
+}
+```
+
+**Delete success** (`200`):
+
+```json
+{ "message": "List deleted successfully." }
+```
+
+**List errors:**
+
+| Situation | Status | Message |
+|-----------|--------|---------|
+| Missing or whitespace-only name | `400` | `"List name is required."` |
+| Name longer than 100 characters | `400` | `"List name must be 100 characters or fewer."` |
+| `listId` is not a number | `400` | `"Invalid list id."` |
+| Missing list, or a list owned by someone else | `404` | `"List with id=<id> not found."` |
+| Missing token | `401` | `"Unauthorized! No token provided."` |

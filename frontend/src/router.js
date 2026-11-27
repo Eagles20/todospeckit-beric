@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Utils from "./config/utils.js";
-import Home from "./views/Home.vue";
+import Dashboard from "./views/Dashboard.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
 
@@ -8,7 +8,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     // Protected page. meta.requiresAuth marks it as "login needed".
-    { path: "/", name: "home", component: Home, meta: { requiresAuth: true } },
+    { path: "/", name: "home", component: Dashboard, meta: { requiresAuth: true } },
     { path: "/login", name: "login", component: Login },
     { path: "/register", name: "register", component: Register },
     // Any unknown address goes to home (which then checks the session).

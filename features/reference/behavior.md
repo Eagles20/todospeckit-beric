@@ -1,6 +1,6 @@
 # Behavior & Rules Reference
 
-**Living snapshot** of product rules currently in force. Feature 1 only.
+**Living snapshot** of product rules currently in force through Feature 2.
 
 These files answer: *"What rules does the app enforce right now?"*
 They do **not** authorize new scope — implement only from `features/feature-*.md`.
@@ -29,4 +29,16 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | A signed-in user who opens the login page is sent to **home** | `router.beforeEach` | Feature 1 |
 | A signed-out user who opens home is sent to **login** | `router.beforeEach` | Feature 1 |
 | Authenticated API calls send `Authorization: Bearer <token>`. A `401` on a protected call clears `user` and goes to login | `services.js` interceptors | Feature 1 |
-| Login and register pages, and the home placeholder, have **no MenuBar**. Home shows **"Welcome, {first name}!"** and a **Sign out** button | Login, Register, Home views | Feature 1 |
+| Login and register pages have **no MenuBar** | `App.vue` | Feature 1 |
+| Home is the lists dashboard. **MenuBar** shows the signed-in user's name and **Sign out** | `Dashboard.vue`, `MenuBar.vue` | Feature 2 |
+
+## Lists
+
+| Rule | Enforcement | Introduced |
+|------|-------------|------------|
+| A list belongs to one user and that owner never changes | Create sets `userId` from `req.user.id`; rename changes `name` only | Feature 2 |
+| List reads, renames, and deletes include `userId: req.user.id`. Another user's list returns **`404`**, never `403` | `getAccessibleListOrNull` | Feature 2 |
+| `GET /todo/lists` returns only the caller's lists, **A to Z by name** | List controller `order` | Feature 2 |
+| List names are trimmed. Empty or whitespace-only names are rejected with **"List name is required."** Names over 100 characters are rejected with **"List name must be 100 characters or fewer."** | List controller and the dashboard form | Feature 2 |
+| The dashboard heading is **My Lists**. Zero lists shows **"No lists yet. Create your first list."** | `Dashboard.vue` | Feature 2 |
+| Each row has **Edit list** and **Delete list** icon actions. Add, rename, and delete use dialogs | `Dashboard.vue` | Feature 2 |
